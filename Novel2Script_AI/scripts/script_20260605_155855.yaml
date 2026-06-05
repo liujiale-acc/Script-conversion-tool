@@ -1,0 +1,80 @@
+metadata:
+  title: 古镇迷雾
+  genre: 玄幻/历史
+  author: 用户提供
+  format: 剧本
+  logline: 书生李慕白进京赶考途中，意外邂逅狐妖，揭开了大唐命运背后的惊天秘密。
+characters:
+  - id: 1
+    name: 李慕白
+    title: 书生
+    personality: 温文儒雅、敏锐善思
+    background: 进京赶考的书生
+  - id: 2
+    name: 林娇儿
+    title: 狐妖
+    personality: 妩媚动人、神秘幽怨
+    background: 客栈女主人，实为白狐精魅
+scenes:
+  - scene_number: 1
+    title: 古镇迷雾
+    setting: 江南古镇青石桥头，清晨，寒雾弥漫
+    time: 清晨
+    characters:
+      - id: 1
+    dialogue_actions:
+      - character_id: 1
+        action: 背着书箧，站立于青石桥头，目光凝重眺望远方
+        dialogue: ""
+      - character_id: 1
+        action: 听到桥下流水潺潺，眉头微皱，低头凝视水面
+        dialogue: "这水声…似乎藏着什么讯息？"
+      - character_id: 1
+        action: 轻叹一声，拾步前行
+        dialogue: "不管前方如何，这条路我必须走到底。"
+  - scene_number: 2
+    title: 红袖添香
+    setting: 林家客栈内堂，夜晚，烛火摇曳
+    time: 晚间
+    characters:
+      - id: 1
+      - id: 2
+    dialogue_actions:
+      - character_id: 2
+        action: 提着红灯笼推门而入，裙袂飘飘，笑容妩媚
+        dialogue: "公子要来投宿么？小女子林娇儿，这间客栈便是我家。"
+      - character_id: 1
+        action: 拱手行礼，目光却被她的身影吸引
+        dialogue: "多谢姑娘，敢问可还有空房？"
+      - character_id: 2
+        action: 轻移莲步，靠近李慕白，眼波流转
+        dialogue: "有是有…只是夜深露重，公子可愿与我共饮一杯暖酒？"
+      - character_id: 1
+        action: 微微一怔，余光瞥见地面上倒映的影子，神色骤变
+        dialogue: "姑娘…你的影子…"
+      - character_id: 2
+        action: 笑容凝固，低头看向脚下，眼中闪过一丝黯然
+        dialogue: "你果然看出来了。"
+  - scene_number: 3
+    title: 真相大白
+    setting: 客栈内堂，烛火忽明忽暗
+    time: 深夜
+    characters:
+      - id: 1
+      - id: 2
+    dialogue_actions:
+      - character_id: 2
+        action: 凄然一笑，身体逐渐透明消散
+        dialogue: "你终于发现了吗？我本非人，不过一介狐妖…却被困于此百年。"
+      - character_id: 1
+        action: 惊愕中翻开手中的《论语》，书页瞬息泛黄，化为一本道家秘籍
+        dialogue: "这…这不是我朝夕研读的圣贤书？"
+      - character_id: 2
+        action: 逐渐化作一阵清风，声音幽咽
+        dialogue: "你的命运已改，大唐的命运亦将因此改写…万事小心。"
+      - character_id: 1
+        action: 握紧秘籍，猛然抬头倾听窗外动静，神色凝重
+        dialogue: "马蹄声…是禁卫军！"
+      - character_id: 1
+        action: 迅速将秘籍藏入怀中，转身快步走向后门
+        dialogue: "这客栈已成牢笼，我须即刻脱身。"
