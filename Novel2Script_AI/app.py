@@ -1,56 +1,20 @@
 import os
-import yaml
-import datetime
+import time
 import re
-from flask import Flask, render_template, request, jsonify
-from dotenv import load_dotenv
+from flask import Flask, render_template, request, jsonify, send_file
+from docx import Document
+from docx.shared import Pt
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 from openai import OpenAI
+from dotenv import load_dotenv
 
-# ==========================================
-# 1. 增强版环境配置加载
-# ==========================================
-# 获取当前脚本所在的绝对路径，确保一定能找到 .env 文件
-basedir = os.path.abspath(os.path.dirname(__file__))
-env_path = os.path.join(basedir, '.env')
-load_dotenv(env_path)
-
-# 获取 API Key
-api_key = os.getenv("DEEPSEEK_API_KEY")
-
-# 【调试打印】
-print("-" * 30)
-if api_key:
-    print(f"✅ 成功读取到 API Key: {api_key[:8]}******{api_key[-4:]}")
-else:
-    print("❌ 错误：未读取到 DEEPSEEK_API_KEY，请检查 .env 文件！")
-print("-" * 30)
-
-os.makedirs('scripts', exist_ok=True)
-
-# ==========================================
-# 2. 配置 DeepSeek 客户端
-# ==========================================
-client = OpenAI(
-    api_key=api_key,
-    base_url="https://api.deepseek.com"
-)
+load_dotenv()
 
 app = Flask(__name__)
-
-# ==========================================
-# 3. 核心 Prompt 设定（全中文标签版本）
-# ==========================================
-SYSTEM_PROMPT = """你是一位专业的金牌编剧。你的任务是将用户输入的小说文本转换为结构化的剧本（YAML格式）。
-必须严格遵守以下规则：
-1. 输出格式必须是纯 YAML 代码，严禁包含任何 Markdown 符号（如 ```yaml ）。
-2. 【全中文标签要求】YAML 的所有字段名（Key）必须使用中文，不得出现 metadata, characters, scenes 等英文单词。
-   请严格遵循以下中文 Schema 结构：
-   - 剧本信息: (包含 标题, 类型, 作者, 梗概)
-   - 角色列表: (包含 角色名, 身份描述, 性格特征)
-   - 场景列表: (包含 场景序号, 地点, 时间, 剧情内容)
-     - 剧情内容 内部包含: (说话人, 动作, 台词)
-3. 角色名必须使用小说中的真实姓名，不得使用代号。
-4. 动作描写要专业，台词要符合角色性格。"""
+client = OpenAI(
+    api_key=os.getenv("DEEPSEEK_API_KEY"),
+    base_url="https://api.deepseek.com"
+)
 
 @app.route('/')
 def index():
@@ -59,50 +23,85 @@ def index():
 @app.route('/convert', methods=['POST'])
 def convert():
     try:
-        data = request.json
-        novel_text = data.get('text', '')
-        
-        if not novel_text:
-            return jsonify({"error": "请输入小说内容"}), 400
+        data = request.get_json()
+        raw_text = data.get('text', '')
+        category = data.get('category', '电影') # 修改为类别
 
-        # 4. 调用 DeepSeek API
-        response = client.chat.completions.create(
-            model="deepseek-chat", 
+        # 调整提示词，强调纯文本排版，不带任何符号
+        prompt = f"""
+        你是一位专业影视编剧。请将小说转为{category}剧本。
+        要求：
+        1. 严禁使用任何Markdown符号（如 *、#、**）。
+        2. 格式结构：
+           剧名：《名称》
+           时长：10-15分钟
+           类别：{category}
+           
+           主要人物设定：
+           名字：描述。
+           
+           （场景序号. 地点 - 时间）
+           角色名：（动作/神态）台词。
+        """
+
+        res = client.chat.completions.create(
+            model="deepseek-chat",
             messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": f"请将以下小说内容转换为全中文标签的剧本：\n\n{novel_text}"},
-            ],
-            stream=False
+                {"role": "system", "content": prompt},
+                {"role": "user", "content": raw_text}
+            ]
         )
         
-        yaml_content = response.choices[0].message.content.strip()
+        output = res.choices[0].message.content
+        # 彻底清洗星号和井号，确保纯净
+        output = re.sub(r'[*#]', '', output)
         
-        # 5. 增强版清理 YAML 格式
-        if "```" in yaml_content:
-            match = re.search(r"```(?:yaml)?\s*([\s\S]*?)\s*```", yaml_content)
-            if match:
-                yaml_content = match.group(1).strip()
-        
-        # 移除可能残留在顶部的 "yaml" 字样
-        if yaml_content.lower().startswith("yaml"):
-            yaml_content = yaml_content[4:].strip()
+        with open("last_record.txt", "w", encoding="utf-8") as f:
+            f.write(output)
 
-        # 6. 自动保存
-        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"script_{timestamp}.yaml"
-        filepath = os.path.join('scripts', filename)
-        
-        with open(filepath, 'w', encoding='utf-8') as f:
-            f.write(yaml_content)
-
-        return jsonify({
-            "success": True,
-            "yaml": yaml_content,
-            "file_saved": filepath
-        })
-
+        return jsonify({"success": True, "script": output})
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"success": False, "msg": str(e)})
+
+@app.route('/download')
+def download():
+    try:
+        if not os.path.exists("last_record.txt"): return "404", 404
+        with open("last_record.txt", "r", encoding="utf-8") as f:
+            lines = f.readlines()
+
+        doc = Document()
+        # 统一使用宋体，无加粗
+        doc.styles['Normal'].font.name = 'SimSun'
+        doc.styles['Normal'].font.size = Pt(11)
+
+        for line in lines:
+            line = line.strip()
+            if not line: continue
+            
+            p = doc.add_paragraph()
+            
+            # 剧名：居中处理，但不加粗
+            if line.startswith("剧名"):
+                p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                run = p.add_run(line)
+                run.font.size = Pt(16)
+            
+            # 场景行：增加段前间距，方便视觉切分，但不加粗
+            elif line.startswith("（场景") or line.startswith("场景"):
+                p.paragraph_format.space_before = Pt(18)
+                p.add_run(line)
+            
+            # 其他内容：直接填入
+            else:
+                p.add_run(line)
+
+        path = os.path.join('scripts', f"script_{int(time.time())}.docx")
+        doc.save(path)
+        return send_file(path, as_attachment=True)
+    except Exception as e:
+        return str(e), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    if not os.path.exists('scripts'): os.makedirs('scripts')
+    app.run(debug=True)
