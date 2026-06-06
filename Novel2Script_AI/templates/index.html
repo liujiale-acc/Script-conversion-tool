@@ -2,77 +2,75 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>AI剧本创作专家系统 2.0</title>
+    <title>AI剧本全链生产系统 v2.0</title>
     <style>
-        :root { --primary: #2c3e50; --accent: #3498db; --success: #27ae60; --bg: #f0f2f5; }
-        body { background: var(--bg); font-family: "PingFang SC", "Microsoft YaHei", sans-serif; margin: 0; padding: 20px; color: #333; }
-        .app-header { text-align: center; margin-bottom: 30px; }
-        .app-header h1 { color: var(--primary); margin-bottom: 5px; }
-        .app-header p { color: #7f8c8d; font-size: 0.9em; }
+        :root { --primary: #2c3e50; --accent: #e67e22; --bg: #f8f9fa; --card: #ffffff; }
+        body { background: var(--bg); font-family: "PingFang SC", sans-serif; margin: 0; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; }
         
-        .main-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px; max-width: 1400px; margin: 0 auto; height: 75vh; }
-        .card { background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); display: flex; flex-direction: column; overflow: hidden; }
-        .card-header { padding: 15px 20px; background: #fff; border-bottom: 1px solid #eee; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        /* 顶部导航 */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: var(--primary); color: white; padding: 15px 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .header h1 { margin: 0; font-size: 22px; }
+
+        .main-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px; height: 70vh; }
+        .card { background: var(--card); border-radius: 12px; display: flex; flex-direction: column; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #eee; }
+        .card-header { padding: 12px 20px; background: #fcfcfc; border-bottom: 1px solid #eee; font-weight: bold; color: var(--primary); display: flex; justify-content: space-between; }
         
-        textarea { flex: 1; padding: 20px; border: none; font-size: 15px; line-height: 1.7; font-family: "SimSun", serif; outline: none; resize: none; background: #fdfdfd; }
+        textarea { flex: 1; padding: 20px; border: none; font-size: 15px; line-height: 1.8; font-family: "SimSun", serif; outline: none; resize: none; background: #fff; color: #333; }
         
-        .control-panel { max-width: 1400px; margin: 20px auto; background: white; padding: 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
-        .opt-group { display: flex; align-items: center; gap: 15px; }
-        
-        select { padding: 10px 15px; border-radius: 6px; border: 1px solid #ddd; outline: none; cursor: pointer; }
-        button { padding: 12px 30px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        /* 状态看板 */
+        .doctor-box { background: #fff9f0; border-top: 2px solid var(--accent); padding: 15px 20px; height: 120px; overflow-y: auto; font-size: 14px; }
+        .doctor-title { color: var(--accent); font-weight: bold; margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
+
+        .bottom-bar { margin-top: 20px; background: white; padding: 20px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .btn { padding: 12px 25px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; }
         .btn-run { background: var(--primary); color: white; }
-        .btn-run:hover { background: #1a252f; transform: translateY(-1px); }
-        .btn-run:disabled { background: #bdc3c7; }
-        .btn-down { background: var(--success); color: white; display: none; }
+        .btn-run:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-down { background: #27ae60; color: white; display: none; }
         
-        /* 酷炫的滚动条 */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+        .badge { background: #e8f4fd; color: #3498db; padding: 4px 10px; border-radius: 4px; font-size: 12px; }
     </style>
 </head>
 <body>
 
-<div class="app-header">
-    <h1>AI 影视剧本全链生产系统</h1>
-    <p>深度赋能编剧：从文字解析到角色分析与分镜生成</p>
-</div>
-
-<div class="main-grid">
-    <!-- 输入区 -->
-    <div class="card">
-        <div class="card-header">小说正文录入</div>
-        <textarea id="novelInput" placeholder="请输入或粘贴小说片段，AI将自动为您分析角色、转换剧本并生成导演分镜提示词..."></textarea>
+<div class="container">
+    <div class="header">
+        <h1>AI 影视剧本全链生产系统 <span style="font-size: 0.6em; opacity: 0.8;">v2.0 专业版</span></h1>
+        <div id="timeStatus">系统就绪 | DeepSeek-V3 Engine</div>
     </div>
 
-    <!-- 输出区 -->
-    <div class="card">
-        <div class="card-header">
-            <span>智能生产结果（角色/剧本/视觉）</span>
-            <span id="statusTag" style="font-size: 0.8em; color: var(--accent);">就绪</span>
+    <div class="main-grid">
+        <div class="card">
+            <div class="card-header">小说正文录入 <span class="badge">支持超长文本</span></div>
+            <textarea id="novelInput" placeholder="在此粘贴小说正文..."></textarea>
         </div>
-        <textarea id="scriptOutput" readonly placeholder="生成结果将包含：
-1. 角色画像分析
-2. 专业剧本格式
-3. AI视觉分镜建议"></textarea>
-    </div>
-</div>
 
-<div class="control-panel">
-    <div class="opt-group">
-        <span><b>创作风格：</b></span>
-        <select id="categorySelect">
-            <option value="电影">电影长片</option>
-            <option value="短剧">短剧 (高节奏)</option>
-            <option value="电视剧">电视剧</option>
-            <option value="动漫脚本">动漫脚本</option>
-        </select>
-        <span style="color: #999; font-size: 0.85em; margin-left: 10px;">由 DeepSeek-V3 提供核心驱动</span>
+        <div class="card">
+            <div class="card-header">智能工作台 <span style="font-weight: normal; font-size: 12px; color: #999;">(生成后可直接在此处修改剧本内容)</span></div>
+            <textarea id="scriptOutput" placeholder="等待 AI 生成结果..."></textarea>
+            
+            <!-- v2.0 剧本医生看板 -->
+            <div class="doctor-box" id="doctorBox">
+                <div class="doctor-title">🩺 剧本医生实时诊断报告</div>
+                <div id="doctorContent" style="color: #666; line-height: 1.6;">等待任务提交以生成诊断评分...</div>
+            </div>
+        </div>
     </div>
-    
-    <div class="opt-group">
-        <button class="btn-run" id="runBtn" onclick="submitTask()">立即生成专业稿件</button>
-        <button class="btn-down" id="downBtn" onclick="location.href='/download'">导出标准 Word 文档</button>
+
+    <div class="bottom-bar">
+        <div style="display: flex; gap: 20px; align-items: center;">
+            <select id="categorySelect" style="padding: 10px; border-radius: 5px;">
+                <option value="电影">电影</option>
+                <option value="短剧">短剧 (高节奏)</option>
+                <option value="电视剧">电视剧</option>
+                <option value="微电影">微电影</option>
+            </select>
+            <span style="font-size: 13px; color: #7f8c8d;">模式：全自动解析 + 人工校对</span>
+        </div>
+        <div>
+            <button class="btn btn-run" id="runBtn" onclick="submitTask()">生成剧本 & 深度诊断</button>
+            <button class="btn btn-down" id="downBtn" onclick="downloadWord()">导出修改后的 Word</button>
+        </div>
     </div>
 </div>
 
@@ -80,13 +78,10 @@
     async function submitTask() {
         const text = document.getElementById('novelInput').value;
         const btn = document.getElementById('runBtn');
-        const status = document.getElementById('statusTag');
-        
         if(!text.trim()) return alert("请输入小说内容");
 
         btn.disabled = true;
-        btn.innerText = "AI 正在深度解析中...";
-        status.innerText = "处理中...";
+        btn.innerText = "正在进行深度创作与诊断...";
 
         try {
             const res = await fetch('/convert', {
@@ -99,19 +94,47 @@
             });
             const data = await res.json();
             if(data.success) {
-                document.getElementById('scriptOutput').value = data.script;
+                // 处理输出：将诊断报告分离出来显示
+                const fullText = data.script;
+                document.getElementById('scriptOutput').value = fullText;
+                
+                // 提取[剧本诊断报告]部分显示在看板
+                const doctorMatch = fullText.match(/\[剧本诊断报告\]([\s\S]*?)\[/);
+                if(doctorMatch) {
+                    document.getElementById('doctorContent').innerText = doctorMatch[1].trim();
+                } else {
+                    document.getElementById('doctorContent').innerText = "诊断已生成，请在上方正文中查看详细分值。";
+                }
+                
                 document.getElementById('downBtn').style.display = "inline-block";
-                status.innerText = "生成成功";
             } else {
-                alert("转换失败: " + data.msg);
-                status.innerText = "失败";
+                alert("转换失败");
             }
         } catch(e) {
-            alert("请求异常，请检查后端运行状态");
-            status.innerText = "异常";
+            alert("请求异常");
         } finally {
             btn.disabled = false;
-            btn.innerText = "立即生成专业稿件";
+            btn.innerText = "生成剧本 & 深度诊断";
+        }
+    }
+
+    async function downloadWord() {
+        const content = document.getElementById('scriptOutput').value;
+        try {
+            const res = await fetch('/download', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ content: content })
+            });
+            const data = await res.json();
+            if(data.success) {
+                // 触发下载
+                window.location.href = '/get_file/' + data.filename;
+            } else {
+                alert("导出失败");
+            }
+        } catch(e) {
+            alert("导出异常");
         }
     }
 </script>
