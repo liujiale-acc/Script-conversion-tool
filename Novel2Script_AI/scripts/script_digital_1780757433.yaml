@@ -1,0 +1,101 @@
+
+metadata:
+  title: "活着"
+  category: "电影"
+analysis:
+  tension_score: 8
+  rhythm_advice: "开场以老福贵自述引出倒叙，节奏舒缓；赌场与家破段落应加快剪辑，用跳切强化败落瞬变；战争被捕段落突出突如其来感；结尾重逢以静默和泪眼收束全情，形成高潮后沉静余韵。"
+characters:
+  - name: "福贵"
+    traits: ["年轻时顽劣嗜赌", "中年后隐忍沧桑", "外表黝黑干瘦", "内心渴望担当"]
+  - name: "家珍"
+    traits: ["外形孕态且单薄", "性格坚贞坚韧", "行动逆来顺受", "动机是守家护子"]
+  - name: "龙二"
+    traits: ["赌场老板", "阴险算计", "瘦脸山羊胡"]
+scenes:
+  - scene_no: 1
+    setting: { loc: "村间土路 田埂下", time: "夏日午后", type: "外" }
+    content:
+      - type: "action"
+        text: "福贵蹲在树下，老牛泡在浅水里甩尾；采风者走近坐下喝水。"
+      - type: "dialogue"
+        role: "采风者"
+        emotion: "放松"
+        text: "大爷，这天气可真够热的。"
+      - type: "dialogue"
+        role: "福贵"
+        emotion: "沉思后微笑"
+        text: "是热，跟我这人一样，一辈子都被火烧着。"
+      - type: "dialogue"
+        role: "福贵"
+        emotion: "突兀而平静"
+        text: "年轻时候我可是个败家少爷，把钱全输光了，爹被我气死。"
+    visual_prompt: "阳光透过树叶投下斑驳光影，知了声此起彼伏，老人与老牛的剪影融为一体。"
+  - scene_no: 2
+    setting: { loc: "赌场", time: "夜晚", type: "内" }
+    content:
+      - type: "action"
+        text: "福贵脸色通红，扔骰子；龙二微笑拨动骰子，轻描淡写宣布他又输。福贵摔桌怒吼。"
+      - type: "action"
+        text: "门帘外家珍轻声呼喊，福贵不予理睬。"
+    visual_prompt: "昏黄烛火下，银元反光如蛇信，骰子滚动特写，门帘外透进一道女人的剪影。"
+  - scene_no: 3
+    setting: { loc: "赌场门口", time: "夜晚", type: "外" }
+    content:
+      - type: "action"
+        text: "家珍跪在石板上，抓住门框；福贵冲出，一把揪起她衣领推倒在地。家珍捂腹掩面。"
+      - type: "dialogue"
+        role: "家珍"
+        emotion: "哀求"
+        text: "福贵，回家吧，我身上有你孩子……求你了。"
+      - type: "dialogue"
+        role: "福贵"
+        emotion: "暴躁"
+        text: "滚回你娘家去！少来碍事！"
+    visual_prompt: "低角度镜头：女人跪姿，肚腹隆起，身后门内灯光晃动；高角度俯拍福贵转身入门的背影。"
+  - scene_no: 4
+    setting: { loc: "典当宅院门口", time: "晌午", type: "外" }
+    content:
+      - type: "action"
+        text: "福贵抱地契走出高墙，佣人四散。老爷子躺在粪缸边气绝。福贵跪地无声。"
+    visual_prompt: "阳光强烈如刀锋，门匾被卸下，墙根灰烬中老人僵直的腿。"
+  - scene_no: 5
+    setting: { loc: "茅草屋门口", time: "傍晚", type: "外" }
+    content:
+      - type: "action"
+        text: "福贵赤膊坐在门槛上埋头，家珍抱着婴儿从黄土路走来。福贵抬头，愕然起身。"
+      - type: "dialogue"
+        role: "家珍"
+        emotion: "平静坚定"
+        text: "我回来了，带着女儿。"
+    visual_prompt: "逆光剪影：女人抱着包袱沿土路走来，风吹起她头发和破烂衣角。"
+  - scene_no: 6
+    setting: { loc: "集市墙角", time: "黄昏", type: "外" }
+    content:
+      - type: "action"
+        text: "福贵被灰军服士兵抓住，推搡拖入队伍。福贵喊叫无人听。"
+    visual_prompt: "匆忙的人流，一只手突然抓住福贵肩膀的冲击特写，背景渐暗。"
+  - scene_no: 7
+    setting: { loc: "茅草屋门口", time: "雨夜", type: "外" }
+    content:
+      - type: "action"
+        text: "家珍怀抱有庆，凤霞拉着她衣角，三人挤在漏雨屋檐下。家珍望向雨幕。"
+      - type: "dialogue"
+        role: "凤霞"
+        emotion: "童真"
+        text: "娘，爹呢？"
+    visual_prompt: "大光圈特写雨滴从瓦缝滴落，女人侧脸被雨水浸湿，幼儿仰头。"
+  - scene_no: 8
+    setting: { loc: "老屋门口", time: "冬日", type: "外" }
+    content:
+      - type: "action"
+        text: "家珍纺线，孩子们打瞌睡。门口出现褴褛的福贵，呆立不语。家珍扔下纺锤跑过去，二人紧紧拥抱。福贵跪下流泪。福贵抚摸凤霞的脸。"
+      - type: "dialogue"
+        role: "福贵"
+        emotion: "哽咽颤抖"
+        text: "我回来了……家珍，我回来了。"
+      - type: "dialogue"
+        role: "凤霞"
+        emotion: "怯生生"
+        text: "爹。"
+    visual_prompt: "逆光中两人相拥，光线从膝盖和背部透出，泪珠滚动，孩童的小手缓慢伸向父亲脸庞。"

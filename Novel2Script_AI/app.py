@@ -4,7 +4,6 @@ import re
 from flask import Flask, render_template, request, jsonify, send_file
 from docx import Document
 from docx.shared import Pt, RGBColor
-from docx.enum.text import WD_ALIGN_PARAGRAPH
 from openai import OpenAI
 from dotenv import load_dotenv
 
@@ -27,26 +26,50 @@ def convert():
         raw_text = data.get('text', '')
         category = data.get('category', '电影')
 
-        # v2.0 升级版 Prompt：保留原有功能，新增[剧本诊断报告]
+        # v2.1 工业级修复版 Prompt：使用唯一标签确保解析成功
         prompt = f"""
-        你是一位顶级影视编剧、导演和剧本医生。请将小说转为{category}剧本。
-        请严格按以下格式输出，严禁使用Markdown符号（如*或#）：
+        你是一位影视工业化专家。请将小说章节转换为{category}剧本。
+        请严格按以下顺序输出，并包含所有标签（严禁使用Markdown符号）：
 
+        [[DIAGNOSIS]]
         [剧本诊断报告]
-        1. 戏剧张力评分：(0-10分)
-        2. 节奏建议：(一句话)
-        3. 核心冲突：(简述)
+        张力评分：(0-10分)
+        节奏建议：(详细分析)
+        核心冲突：(简述)
 
+        [[TEXT_VERSION]]
         [角色画像分析]
-        （提取主要人物的外貌、性格及动机）
+        (提取人物外貌、性格、动机)
 
         [专业剧本正文]
-        剧名：《名称》
-        （场景序号. 地点 - 时间）
-        角色名：（动作/神态）台词。
+        (剧本正文内容，包含场景、台词、动作)
 
         [视觉分镜提示词]
-        （为主要场景提供AI绘图描述）
+        (场景视觉描述)
+
+        [[YAML_VERSION]]
+        ---
+        metadata:
+          title: "剧名"
+          category: "{category}"
+        analysis:
+          tension_score: 10
+          rhythm_advice: "节奏建议"
+        characters:
+          - name: "角色名"
+            traits: ["特征"]
+        scenes:
+          - scene_no: 1
+            setting: {{ loc: "地点", time: "时间", type: "内/外" }}
+            content:
+              - type: "action"
+                text: "动作描写"
+              - type: "dialogue"
+                role: "角色名"
+                emotion: "神态"
+                text: "台词内容"
+            visual_prompt: "分镜提示词"
+        ---
         """
 
         res = client.chat.completions.create(
@@ -58,12 +81,8 @@ def convert():
         )
         
         full_output = res.choices[0].message.content
-        full_output = re.sub(r'[*#]', '', full_output)
+        full_output = re.sub(r'[*#]', '', full_output) # 清理杂质
         
-        # 存入临时文件（作为备份）
-        with open("last_record.txt", "w", encoding="utf-8") as f:
-            f.write(full_output)
-
         return jsonify({"success": True, "script": full_output})
     except Exception as e:
         return jsonify({"success": False, "msg": str(e)})
@@ -71,39 +90,33 @@ def convert():
 @app.route('/download', methods=['POST'])
 def download():
     try:
-        # v2.0 改进：接收前端传回的最新文本（包含用户的手动修改）
         data = request.get_json()
         content = data.get('content', '')
+        file_type = data.get('type', 'docx')
         
         if not content:
             return jsonify({"success": False, "msg": "内容为空"}), 400
 
-        doc = Document()
-        doc.styles['Normal'].font.name = 'SimSun'
-        
-        sections = content.split('\n')
-        for line in sections:
-            line = line.strip()
-            if not line: continue
-            
-            p = doc.add_paragraph()
-            # 针对不同板块设置样式
-            if any(tag in line for tag in ["[剧本诊断报告]", "[角色画像分析]", "[专业剧本正文]", "[视觉分镜提示词]"]):
-                run = p.add_run(line)
-                run.font.size = Pt(14)
-                run.font.bold = True
-                run.font.color.rgb = RGBColor(44, 62, 80)
-            elif "剧名" in line:
-                p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-                run = p.add_run(line)
-                run.font.size = Pt(16)
-            else:
-                p.add_run(line)
+        if file_type == 'yaml':
+            filename = f"script_digital_{int(time.time())}.yaml"
+            path = os.path.join('scripts', filename)
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(content)
+        else:
+            doc = Document()
+            for line in content.split('\n'):
+                line = line.strip()
+                if not line: continue
+                p = doc.add_paragraph()
+                if "[" in line and "]" in line:
+                    run = p.add_run(line)
+                    run.font.bold = True
+                else:
+                    p.add_run(line)
+            filename = f"AI_Script_v2.1_{int(time.time())}.docx"
+            path = os.path.join('scripts', filename)
+            doc.save(path)
 
-        filename = f"AI_Script_v2_{int(time.time())}.docx"
-        path = os.path.join('scripts', filename)
-        doc.save(path)
-        # 返回文件名，让前端触发下载
         return jsonify({"success": True, "filename": filename})
     except Exception as e:
         return jsonify({"success": False, "msg": str(e)})
