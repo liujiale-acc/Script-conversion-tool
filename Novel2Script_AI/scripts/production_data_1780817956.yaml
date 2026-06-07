@@ -1,0 +1,124 @@
+
+metadata:
+  title: “活着（电影版）”
+  category: “电影标准模式”
+scenes:
+  - scene_no: 1
+    setting: { loc: “乡间田埂”, time: “午后”, type: “外景” }
+    props: [“茶桶”, “老牛”, “草帽”]
+    characters: [“福贵（老）”, “叙述者”]
+    content:
+      - type: “action”
+        text: “烈日炙烤，知了声阵阵。叙述者走近田埂树下歇息的福贵和老牛。”
+      - type: “dialogue”
+        role: “叙述者”
+        emotion: “好奇”
+        text: “大爷，歇着呢？”
+      - type: “dialogue”
+        role: “福贵（老）”
+        emotion: “淡然”
+        text: “是啊，活了一辈子，亲人一个个先走，就剩这老牛陪着了。”
+
+  - scene_no: 2
+    setting: { loc: “赌场”, time: “夜”, type: “内景” }
+    props: [“骰子”, “田契”, “银元”, “灯盏”]
+    characters: [“福贵（青）”, “龙二”]
+    content:
+      - type: “action”
+        text: “烟雾弥漫，骰子声乱响。福贵（青）面红耳赤，将田契拍在桌上。”
+      - type: “dialogue”
+        role: “龙二”
+        emotion: “狡猾地笑”
+        text: “福贵少爷，手气不错啊，再押一局？”
+      - type: “dialogue”
+        role: “福贵（青）”
+        emotion: “癫狂”
+        text: “全押上！老子今天赢定了！”
+
+  - scene_no: 3
+    setting: { loc: “赌场门外”, time: “夜”, type: “外景” }
+    props: [“门”, “灯笼”]
+    characters: [“家珍”, “福贵（青）”]
+    content:
+      - type: “action”
+        text: “家珍（怀孕）跪在地上，泪眼婆娑拉门劝夫。”
+      - type: “dialogue”
+        role: “家珍”
+        emotion: “悲切”
+        text: “福贵！回家吧！我给你炖了鸡汤——”
+      - type: “action”
+        text: “福贵（青）醉醺醺出来，一脚踢翻家珍。”
+      - type: “dialogue”
+        role: “福贵（青）”
+        emotion: “暴躁”
+        text: “滚开！少管闲事！”
+
+  - scene_no: 4
+    setting: { loc: “福贵老宅”, time: “日”, type: “外景” }
+    props: [“粪缸”, “宅院”]
+    characters: [“福贵父亲”, “福贵（青）”]
+    content:
+      - type: “action”
+        text: “龙二带人搬走家具，福贵父亲气极，从粪缸边摔落，口吐鲜血死去。”
+      - type: “action”
+        text: “福贵（青）跪在废墟前，眼神呆滞。”
+
+  - scene_no: 5
+    setting: { loc: “茅草屋前”, time: “日”, type: “外景” }
+    props: [“锄头”, “包裹”]
+    characters: [“福贵（青）”, “家珍”, “凤霞（婴）”]
+    content:
+      - type: “action”
+        text: “数月后，福贵（青）扛着锄头，黑瘦如柴。家珍抱女童走来。”
+      - type: “dialogue”
+        role: “家珍”
+        emotion: “沙哑哽咽”
+        text: “我回来了。”
+      - type: “action”
+        text: “福贵（青）扔掉锄头，上前抱住妻女痛哭。”
+
+  - scene_no: 6
+    setting: { loc: “乡间田埂”, time: “午后”, type: “外景” }
+    props: [“茶桶”, “老牛”]
+    characters: [“福贵（老）”, “叙述者”]
+    content:
+      - type: “action”
+        text: “福贵（老）讲完一段回忆，拍拍老牛。”
+      - type: “dialogue”
+        role: “福贵（老）”
+        emotion: “苦涩”
+        text: “后来，又被抓了壮丁，两年没回家。”
+
+  - scene_no: 7
+    setting: { loc: “战俘营/道路”, time: “日”, type: “外景” }
+    props: [“步枪”, “长队”]
+    characters: [“福贵（青）”, “众多壮丁”]
+    content:
+      - type: “action”
+        text: “枪炮声中，福贵（青）和一群衣衫褴褛的壮丁在泥泞中行军。”
+
+  - scene_no: 8
+    setting: { loc: “茅草屋前”, time: “日”, type: “外景” }
+    props: [“野菜”, “纺线”]
+    characters: [“家珍（稍老）”, “有庆（童）”]
+    content:
+      - type: “action”
+        text: “家珍带着儿子有庆挖野菜，憔悴但腰杆笔直。”
+      - type: “dialogue”
+        role: “家珍”
+        emotion: “坚定”
+        text: “一定要撑到福贵回来……”
+
+  - scene_no: 9
+    setting: { loc: “福贵家破门口”, time: “日”, type: “外景” }
+    props: [“门”]
+    characters: [“福贵（青）”, “家珍”]
+    content:
+      - type: “action”
+        text: “福贵（青）衣衫褴褛推开家门，与家珍对视。”
+      - type: “action”
+        text: “两人抱头痛哭。”
+      - type: “dialogue”
+        role: “家珍”
+        emotion: “泣不成声”
+        text: “你可算回来了……”
