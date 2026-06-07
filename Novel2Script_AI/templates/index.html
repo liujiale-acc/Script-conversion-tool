@@ -2,273 +2,186 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>AI剧本全链生产系统 v3.0 (Industrial Edition)</title>
-    <!-- 引入专业 YAML 解析引擎 -->
+    <title>AI 影视剧本全链生产系统</title>
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <style>
-        :root { --primary: #2c3e50; --accent: #e67e22; --success: #27ae60; --bg: #f8f9fa; --card: #ffffff; }
-        body { background: var(--bg); font-family: "PingFang SC", "Microsoft YaHei", sans-serif; margin: 0; padding: 20px; }
-        .container { max-width: 1400px; margin: 0 auto; }
+        :root { --primary: #2c3e50; --accent: #e67e22; --success: #27ae60; --bg: #f4f7f6; --card: #ffffff; --border: #ddd; }
+        body { background: var(--bg); font-family: "PingFang SC", "Microsoft YaHei", sans-serif; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 1440px; margin: 0 auto; }
         
-        /* 头部样式 */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: var(--primary); color: white; padding: 15px 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .header h1 { margin: 0; font-size: 22px; }
+        /* 头部样式 - 专业制片风格 */
+        .header { 
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; 
+            background: var(--primary); color: white; padding: 15px 30px; border-radius: 10px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+        }
+        .header h1 { margin: 0; font-size: 22px; letter-spacing: 1px; }
+        .tag-item { background: var(--success); color: white; padding: 4px 12px; border-radius: 5px; font-size: 12px; font-weight: bold; margin-left: 10px; }
 
-        /* 主栅格布局 */
-        .main-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px; height: 65vh; margin-bottom: 20px; }
-        .card { background: var(--card); border-radius: 12px; display: flex; flex-direction: column; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #ddd; }
-        
-        /* Tab 标签切换 */
-        .tab-bar { display: flex; background: #eee; border-bottom: 1px solid #ddd; }
-        .tab { padding: 12px 25px; cursor: pointer; border: none; font-weight: bold; color: #666; transition: 0.3s; background: none; }
+        .main-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px; height: 62vh; margin-bottom: 20px; }
+        .card { background: var(--card); border-radius: 12px; display: flex; flex-direction: column; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid var(--border); }
+        .card-title { padding: 12px 20px; font-weight: bold; border-bottom: 1px solid #eee; background: #fafafa; color: #666; font-size: 14px; }
+
+        .tab-bar { display: flex; background: #eee; border-bottom: 1px solid var(--border); }
+        .tab { padding: 12px 25px; cursor: pointer; border: none; font-weight: bold; color: #666; background: none; outline: none; transition: 0.3s; }
         .tab.active { background: white; color: var(--accent); border-bottom: 3px solid var(--accent); }
 
-        textarea { flex: 1; padding: 20px; border: none; font-size: 15px; line-height: 1.8; font-family: "SimSun", serif; outline: none; resize: none; }
+        textarea { flex: 1; padding: 25px; border: none; font-size: 15px; line-height: 1.8; font-family: "SimSun", serif; outline: none; resize: none; background: white; }
         #yamlOutput { background: #1e1e1e; color: #d4d4d4; font-family: 'Consolas', monospace; display: none; }
 
-        /* 剧本医生诊断框 */
+        /* 奶黄色诊断报告区 */
         .doctor-box { background: #fff9f0; border-top: 1px solid #ffeeba; padding: 15px 20px; height: 100px; overflow-y: auto; font-size: 14px; }
-        .doctor-title { color: var(--accent); font-weight: bold; margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
+        .doctor-title { color: var(--accent); font-weight: bold; margin-bottom: 5px; }
 
-        /* v3.0 制片看板样式 */
-        .dashboard { display: none; margin-top: 20px; padding: 20px; background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #ddd; }
-        .dash-header { font-weight: bold; color: var(--primary); margin-bottom: 15px; border-bottom: 2px solid var(--success); padding-bottom: 5px; font-size: 16px; }
-        .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
-        .stat-card { background: #f9f9f9; padding: 15px; border-radius: 8px; border-left: 5px solid var(--success); }
-        .stat-val { font-size: 24px; font-weight: bold; color: var(--primary); }
-        .stat-label { font-size: 12px; color: #7f8c8d; }
+        /* 数字化看板 - 彻底清理非正式词汇 */
+        .dashboard { display: none; background: white; padding: 25px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .dash-header { font-weight: bold; color: var(--primary); margin-bottom: 20px; border-bottom: 2px solid var(--success); padding-bottom: 8px; font-size: 16px; }
 
-        .breakdown-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
-        .breakdown-table th { background: #f2f2f2; padding: 12px 10px; text-align: left; }
-        .breakdown-table td { padding: 10px; border-bottom: 1px solid #eee; }
-        .tag { background: #e8f4fd; color: #3498db; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-right: 5px; }
-        .prop-tag { background: #fff4e6; color: #e67e22; border: 1px solid #ffe8cc; }
-
-        /* 底部操作栏 */
-        .bottom-bar { background: white; padding: 20px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; margin-top: 20px; box-shadow: 0 -4px 10px rgba(0,0,0,0.02); }
-        .btn { padding: 12px 25px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; color: white; transition: 0.3s; }
-        .btn-run { background: var(--primary); }
-        .btn-down { background: var(--success); display: none; margin-left: 10px; }
-        .btn-yaml { background: #3498db; display: none; margin-left: 10px; }
+        .tension-scroll-container { background: #fcfcfc; border: 1px solid #eee; border-radius: 8px; padding: 20px; margin-bottom: 20px; overflow-x: auto; }
         
-        .select-style { padding: 10px 15px; border-radius: 5px; border: 1px solid #ddd; font-weight: bold; color: var(--primary); outline: none; }
+        /* 叙事阶段多维度分布 */
+        .arc-box { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; min-width: 1000px; align-items: flex-end; }
+        .stage-column { display: flex; flex-direction: column; align-items: center; border-right: 1px dashed #ddd; padding: 0 5px; }
+        .stage-column:last-child { border-right: none; }
+        .bars-container { display: flex; align-items: flex-end; gap: 4px; height: 100px; width: 100%; justify-content: center; margin-bottom: 10px; }
+        .bar { width: 14px; background: linear-gradient(to top, #3498db, #e74c3c); border-radius: 3px 3px 0 0; position: relative; }
+        .bar::after { content: attr(data-score); position: absolute; top: -18px; left: 50%; transform: translateX(-50%); font-size: 9px; color: #666; font-weight: bold; }
+        .stage-title { font-size: 12px; font-weight: bold; color: #2c3e50; background: #e8f4fd; padding: 4px 10px; border-radius: 4px; }
+
+        .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: #f9f9f9; padding: 15px; border-radius: 8px; border-left: 5px solid var(--success); }
+        .stat-val { font-size: 24px; font-weight: bold; color: var(--primary); display: block; }
+        .stat-name { font-size: 11px; color: #7f8c8d; }
+
+        /* 生产要素表格 */
+        .prod-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .prod-table th { background: #f8f9fa; padding: 12px; text-align: left; border-bottom: 2px solid #eee; }
+        .prod-table td { padding: 12px; border-bottom: 1px solid #eee; }
+        .badge { background: #e8f4fd; color: #3498db; padding: 2px 8px; border-radius: 4px; font-size: 11px; margin-right: 5px; border: 1px solid #d1e9fa; }
+
+        .bottom-bar { background: white; padding: 20px 30px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; margin-top: 20px; border: 1px solid var(--border); }
+        .btn { padding: 12px 25px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; color: white; transition: 0.3s; }
+        .btn-run { background: var(--primary); }
+        .btn-ghost { background: var(--success); display: none; margin-left: 10px; }
+        .select-ui { padding: 10px; border-radius: 5px; border: 1px solid var(--border); font-weight: bold; color: var(--primary); background: white; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <h1>AI 影视剧本全链生产系统 <span style="font-size: 0.5em; background: var(--success); padding: 3px 10px; border-radius: 5px;">v3.0 Final Production</span></h1>
-        <div style="font-size: 14px;">功能全开：电影 / 短剧 / 电视剧 / 动漫 / 数字化拆解</div>
+        <h1>AI 影视剧本全链生产系统</h1>
+        <div>
+            <span class="tag-item">文学诊断</span>
+            <span class="tag-item">数字化映射</span>
+            <span class="tag-item">要素拆解分析</span>
+        </div>
     </div>
 
     <div class="main-grid">
-        <!-- 左侧：输入卡片 -->
         <div class="card">
-            <div style="padding:15px; font-weight:bold; border-bottom:1px solid #eee; background:#fcfcfc;">小说原著正文录入</div>
-            <textarea id="novelInput" placeholder="在此粘贴小说正文内容（建议输入3章以上以生成完整的工业制片拆解表）..."></textarea>
+            <div class="card-title">📖 原著内容录入</div>
+            <textarea id="novelInput" placeholder="在此粘贴原著正文内容..."></textarea>
         </div>
-
-        <!-- 右侧：输出工作台 -->
         <div class="card">
             <div class="tab-bar">
-                <button class="tab active" id="tabScript" onclick="switchTab('script')">📖 专业剧本预览</button>
-                <button class="tab" id="tabYaml" onclick="switchTab('yaml')">⚙️ YAML 数字化映射 (制片核心)</button>
+                <button class="tab active" id="tabS" onclick="switchTab('s')">📖 剧本正文预览</button>
+                <button class="tab" id="tabY" onclick="switchTab('y')">⚙️ 数字化生产映射</button>
             </div>
-            
-            <textarea id="scriptOutput" placeholder="等待数据处理..."></textarea>
-            <textarea id="yamlOutput" placeholder="等待生成 YAML 数字化映射..."></textarea>
-            
-            <!-- 诊断看板 -->
-            <div class="doctor-box" id="doctorBox">
-                <div class="doctor-title">🩺 剧本医生实时诊断</div>
-                <div id="doctorContent" style="color:#666; line-height:1.6;">系统准备就绪，请录入小说内容并点击“执行全链生产”。</div>
+            <textarea id="scriptOutput" placeholder="等待处理..."></textarea>
+            <textarea id="yamlOutput" placeholder="等待数据映射..."></textarea>
+            <div class="doctor-box">
+                <div class="doctor-title">🩺 剧本智能诊断报告</div>
+                <div id="doctorContent">系统已就绪，实时监控文学节奏并进行工业化拆解。</div>
             </div>
         </div>
     </div>
 
-    <!-- v3.0 制片自动化拆解看板 -->
     <div class="dashboard" id="prodDash">
-        <div class="dash-header">📊 影视制片全要素拆解报表 (Production Breakdown Dashboard)</div>
-        <div class="stat-grid">
-            <div class="stat-card">
-                <div class="stat-label">总场次数 (Total Scenes)</div>
-                <div class="stat-val" id="countScenes">0</div>
-            </div>
-            <div class="stat-card" style="border-left-color: #3498db;">
-                <div class="stat-label">拍摄地总数 (Locations)</div>
-                <div class="stat-val" id="countLocs">0</div>
-            </div>
-            <div class="stat-card" style="border-left-color: #e67e22;">
-                <div class="stat-label">内景 / 外景占比</div>
-                <div class="stat-val" id="ratioInOut">0 / 0</div>
-            </div>
-            <div class="stat-card" style="border-left-color: #9b59b6;">
-                <div class="stat-label">提取关键道具数</div>
-                <div class="stat-val" id="countProps">0</div>
+        <div class="dash-header">📊 影视生产全要素分析看板 (Production Dashboard)</div>
+        <div class="tension-scroll-container">
+            <div style="font-size: 13px; font-weight: bold; color: #666; margin-bottom: 15px;">📉 叙事张力趋势分布 (Story Tension Arc)</div>
+            <div class="arc-box">
+                <div class="stage-column"><div class="bars-container" id="bars-序幕"></div><div class="stage-title">序幕</div></div>
+                <div class="stage-column"><div class="bars-container" id="bars-叙事发展"></div><div class="stage-title">叙事发展</div></div>
+                <div class="stage-column"><div class="bars-container" id="bars-冲突爆发"></div><div class="stage-title">冲突爆发</div></div>
+                <div class="stage-column"><div class="bars-container" id="bars-高潮"></div><div class="stage-title">高潮</div></div>
+                <div class="stage-column"><div class="bars-container" id="bars-结局"></div><div class="stage-title">结局</div></div>
             </div>
         </div>
-        
-        <table class="breakdown-table">
-            <thead>
-                <tr>
-                    <th>场次</th>
-                    <th>场景地点</th>
-                    <th>时间</th>
-                    <th>拍摄类型</th>
-                    <th>主要人物</th>
-                    <th>关键制片道具</th>
-                </tr>
-            </thead>
-            <tbody id="breakdownBody"></tbody>
-        </table>
+        <div class="stat-grid" id="statGrid"></div>
+        <table class="prod-table"><thead><tr><th>序号</th><th>拍摄地点</th><th>环境类型</th><th>登场人物</th><th>生产道具</th></tr></thead><tbody id="breakdownBody"></tbody></table>
     </div>
 
-    <!-- 底部操作栏 -->
     <div class="bottom-bar">
+        <select id="categorySelect" class="select-ui">
+            <option value="电影标准模式">🎬 电影标准模式</option>
+            <option value="短剧">⚡ 短剧 (高频率反转模式)</option>
+            <option value="电视剧">📺 电视剧 (叙事模式)</option>
+            <option value="动漫/番剧">🎨 动漫/番剧</option>
+            <option value="宣传片">📱 宣传片/广告</option>
+        </select>
         <div>
-            <!-- 恢复全规格下拉菜单 -->
-            <select id="categorySelect" class="select-style">
-                <option value="电影标准模式">🎬 电影标准模式</option>
-                <option value="短剧(高节奏/反转)">⚡ 短剧 (竖屏/高反转)</option>
-                <option value="电视剧/网络剧">📺 电视剧 (长篇叙事)</option>
-                <option value="动漫/番剧">🎨 动漫/番剧 (分镜风格)</option>
-                <option value="短视频广告">📱 短视频广告/宣传片</option>
-            </select>
-        </div>
-        <div>
-            <button class="btn btn-run" id="runBtn" onclick="submitTask()">执行全链生产 & 自动拆表</button>
-            <button class="btn btn-down" id="downWordBtn" onclick="downloadFile('docx')">导出专业 Word</button>
-            <button class="btn btn-yaml" id="downYamlBtn" onclick="downloadFile('yaml')">导出制片 YAML</button>
+            <button class="btn btn-run" id="runBtn" onclick="submitTask()">执行数字化拆解分析</button>
+            <button class="btn btn-ghost" id="downW" onclick="downloadFile('docx')">导出剧本文件</button>
+            <button class="btn btn-ghost" id="downY" onclick="downloadFile('yaml')">导出生产数据</button>
         </div>
     </div>
 </div>
 
 <script>
-    // Tab 切换逻辑
-    function switchTab(mode) {
-        if(mode === 'script') {
-            document.getElementById('tabScript').classList.add('active');
-            document.getElementById('tabYaml').classList.remove('active');
-            document.getElementById('scriptOutput').style.display = 'block';
-            document.getElementById('yamlOutput').style.display = 'none';
-        } else {
-            document.getElementById('tabScript').classList.remove('active');
-            document.getElementById('tabYaml').classList.add('active');
-            document.getElementById('scriptOutput').style.display = 'none';
-            document.getElementById('yamlOutput').style.display = 'block';
-        }
-    }
+    function switchTab(m){const isS=m==='s';document.getElementById('tabS').classList.toggle('active',isS);document.getElementById('tabY').classList.toggle('active',!isS);document.getElementById('scriptOutput').style.display=isS?'block':'none';document.getElementById('yamlOutput').style.display=isS?'none':'block';}
+    document.getElementById('yamlOutput').addEventListener('input', function(){renderUI(this.value);});
 
-    // 核心提交任务
     async function submitTask() {
         const text = document.getElementById('novelInput').value;
         const btn = document.getElementById('runBtn');
-        if(!text.trim()) return alert("请输入小说内容");
-
-        btn.disabled = true; 
-        btn.innerText = "专家正在深度拆解中...";
-
+        if(!text.trim()) return alert("请输入原著内容");
+        btn.disabled = true; btn.innerText = "智能分析中...";
         try {
-            const res = await fetch('/convert', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    text: text, 
-                    category: document.getElementById('categorySelect').value
-                })
-            });
+            const res = await fetch('/convert', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({text: text, category: document.getElementById('categorySelect').value}) });
             const data = await res.json();
-            
             if(data.success) {
                 const raw = data.script;
-                
-                // 基于标签的高精准切分
-                const diagPart = raw.split('[[DIAGNOSIS]]')[1]?.split('[[TEXT_VERSION]]')[0] || "诊断生成中...";
-                const textPart = raw.split('[[TEXT_VERSION]]')[1]?.split('[[YAML_VERSION]]')[0] || "剧本生成中...";
-                const yamlPart = raw.split('[[YAML_VERSION]]')[1] || "";
-
-                // 填充 UI
-                document.getElementById('scriptOutput').value = textPart.trim();
-                let cleanYaml = yamlPart.trim().replace(/---/g, '').replace(/```yaml/g, '').replace(/```/g, '');
+                const diag = raw.match(/\[\[DIAGNOSIS\]\]([\s\S]*?)\[\[/)?.[1] || "暂无报告";
+                const script = raw.match(/\[\[TEXT_VERSION\]\]([\s\S]*?)\[\[/)?.[1] || "生成中...";
+                const yaml = raw.split('[[YAML_VERSION]]')[1] || "";
+                document.getElementById('scriptOutput').value = script.trim();
+                let cleanYaml = yaml.trim().replace(/---/g, '').replace(/```yaml/g, '').replace(/```/g, '');
                 document.getElementById('yamlOutput').value = cleanYaml;
-                document.getElementById('doctorContent').innerText = diagPart.trim();
-
-                // 执行 v3.0 制片看板渲染
-                renderDashboard(cleanYaml);
-
-                // 显示功能按钮和看板
-                document.getElementById('downWordBtn').style.display = "inline-block";
-                document.getElementById('downYamlBtn').style.display = "inline-block";
+                document.getElementById('doctorContent').innerText = diag.trim();
+                renderUI(cleanYaml);
                 document.getElementById('prodDash').style.display = "block";
+                document.querySelectorAll('.btn-ghost').forEach(b => b.style.display = "inline-block");
             }
-        } catch(e) { 
-            alert("转换异常，请检查后端运行状态"); 
-            console.error(e);
-        } finally { 
-            btn.disabled = false; 
-            btn.innerText = "执行全链生产 & 自动拆表"; 
-        }
+        } catch(e) { alert("引擎连接异常"); } finally { btn.disabled = false; btn.innerText = "执行数字化拆解分析"; }
     }
 
-    // v3.0 高精度制片拆解引擎 (js-yaml 驱动)
-    function renderDashboard(yamlStr) {
+    function renderUI(yamlStr) {
         try {
             const doc = jsyaml.load(yamlStr);
-            if (!doc || !doc.scenes) return;
-
-            let html = "";
-            let intCount = 0, extCount = 0;
-            let allProps = new Set(), allLocs = new Set();
-
-            doc.scenes.forEach((scene, index) => {
-                const loc = scene.setting?.loc || "未知";
-                const time = scene.setting?.time || "日";
-                const type = scene.setting?.type || "内景";
-                const chars = scene.characters || [];
-                const props = scene.props || [];
-
-                if(type.includes("内")) intCount++; else if(type.includes("外")) extCount++;
-                if(loc !== "未知") allLocs.add(loc);
-                
-                // 处理标签化显示
-                let propHtml = props.map(p => `<span class="tag prop-tag">${p}</span>`).join('');
-                props.forEach(p => allProps.add(p));
-                let charHtml = chars.map(c => `<span class="tag">${c}</span>`).join('');
-
-                html += `<tr>
-                    <td>${scene.scene_no || index + 1}</td>
-                    <td style="font-weight:bold;">${loc}</td>
-                    <td>${time}</td>
-                    <td>${type}</td>
-                    <td>${charHtml}</td>
-                    <td>${propHtml}</td>
-                </tr>`;
+            if(!doc || !doc.scenes) return;
+            ["序幕", "叙事发展", "冲突爆发", "高潮", "结局"].forEach(st => document.getElementById(`bars-${st}`).innerHTML = "");
+            let table = "", intC = 0, extC = 0, propsS = new Set(), locS = new Set();
+            doc.scenes.forEach((s, idx) => {
+                const tension = s.tension || 5, stage = s.stage || "叙事发展";
+                const loc = s.setting?.loc || "未知", type = s.setting?.type || "内景";
+                if(type.includes("内")) intC++; else extC++;
+                if(loc !== "未知") locS.add(loc);
+                const targetDiv = document.getElementById(`bars-${stage}`);
+                if(targetDiv) targetDiv.innerHTML += `<div class="bar" style="height:${tension*10}%" data-score="${tension}"></div>`;
+                let chars = (s.characters || []).map(c => `<span class="badge">${c}</span>`).join('');
+                let props = (s.props || []).map(p => { propsS.add(p); return `<span class="badge" style="color:var(--accent); border-color:#ffeeba;">${p}</span>` }).join('');
+                table += `<tr><td>${idx+1}</td><td>${loc}</td><td>${type}</td><td>${chars}</td><td>${props}</td></tr>`;
             });
-
-            document.getElementById('breakdownBody').innerHTML = html;
-            document.getElementById('countScenes').innerText = doc.scenes.length;
-            document.getElementById('countLocs').innerText = allLocs.size;
-            document.getElementById('ratioInOut').innerText = `${intCount} / ${extCount}`;
-            document.getElementById('countProps').innerText = allProps.size;
-
-        } catch (e) {
-            console.warn("YAML 数据解析异常", e);
-            document.getElementById('breakdownBody').innerHTML = "<tr><td colspan='6' style='text-align:center; color:#999;'>制片数据正在同步中，请稍后...</td></tr>";
-        }
+            document.getElementById('breakdownBody').innerHTML = table;
+            document.getElementById('statGrid').innerHTML = `<div class="stat-card"><span class="stat-name">剧本总场次数</span><span class="stat-val">${doc.scenes.length}</span></div><div class="stat-card" style="border-left-color:#3498db;"><span class="stat-name">独立拍摄场景</span><span class="stat-val">${locS.size}</span></div><div class="stat-card" style="border-left-color:#e67e22;"><span class="stat-name">内/外景分布</span><span class="stat-val">${intC} : ${extC}</span></div><div class="stat-card" style="border-left-color:#9b59b6;"><span class="stat-name">生产要素数量</span><span class="stat-val">${propsS.size}</span></div>`;
+        } catch(e) {}
     }
 
-    // 文件导出逻辑
-    async function downloadFile(type) {
-        const content = (type === 'yaml') ? 
-            document.getElementById('yamlOutput').value : 
-            document.getElementById('scriptOutput').value;
-            
-        const res = await fetch('/download', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ content: content, type: type })
-        });
+    async function downloadFile(t) {
+        const content = t==='yaml' ? document.getElementById('yamlOutput').value : document.getElementById('scriptOutput').value;
+        const res = await fetch('/download', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ content, type: t }) });
         const data = await res.json();
         if(data.success) window.location.href = '/get_file/' + data.filename;
     }
